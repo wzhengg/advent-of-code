@@ -16,11 +16,19 @@ func main() {
 	data = bytes.TrimSpace(data)
 	grid := bytes.Split(data, []byte{'\n'})
 
-	res := countAccessableRolls(grid)
+	var res int
+	for {
+		n := removeRolls(grid)
+		if n == 0 {
+			break
+		}
+		res += n
+	}
+
 	fmt.Println(res)
 }
 
-func countAccessableRolls(grid [][]byte) int {
+func removeRolls(grid [][]byte) int {
 	rows, cols := len(grid), len(grid[0])
 
 	dirs := []struct{ r, c int }{
@@ -43,6 +51,7 @@ func countAccessableRolls(grid [][]byte) int {
 				}
 			}
 			if rolls < 4 {
+				grid[r][c] = '.'
 				res++
 			}
 		}
