@@ -1,33 +1,36 @@
 module Main where
 
+import Data.List
 import Data.List.Split
 
 type Range = (Integer, Integer)
 
-countFreshIds :: [Range] -> [Integer] -> Integer
-countFreshIds ranges ids = foldr f 0 ids
-  where
-    f id acc | isFreshId ranges id = acc + 1 | otherwise = acc
+countIds :: [Range] -> Integer
+countIds =
+  let f (start, end) acc = acc + (end - start + 1)
+   in foldr f 0 . mergeRanges
 
-isFreshId :: [Range] -> Integer -> Bool
-isFreshId ranges id = foldr f False ranges
-  where
-    f (start, end) acc = acc || start <= id && id <= end
-
-parseContents :: String -> ([Range], [Integer])
-parseContents s =
-  let parts = span (/= "") . lines $ s
-      ranges = fst parts
-      ranges' = map parseRange ranges
+mergeRanges :: [Range] -> [Range]
+mergeRanges [] = []
+mergeRanges ranges =
+  let f range [] = [range]
+      f range@(start, end) acc@(x : xs)
+        | start <= end' = (start', max end end') : xs
+        | otherwise = range : acc
         where
-          parseRange s = case splitOn "-" s of
-            (x : y : []) -> (read x :: Integer, read y :: Integer)
-            _ -> error "Invalid range"
-      ids = drop 1 (snd parts)
-      ids' = map (\x -> read x :: Integer) ids
-   in (ranges', ids')
+          (start', end') = x
+   in foldr f [] . reverse . sort $ ranges
+
+parseContents :: String -> [Range]
+parseContents s =
+  let ranges = takeWhile (/= "") . lines $ s
+      ranges' = map parseRange ranges
+      parseRange s = case splitOn "-" s of
+        (x : y : []) -> (read x :: Integer, read y :: Integer)
+        _ -> error "Invalid range"
+   in ranges'
 
 main :: IO ()
 main = do
   contents <- readFile "input.txt"
-  putStrLn . show . uncurry countFreshIds . parseContents $ contents
+  putStrLn . show . countIds . parseContents $ contents
