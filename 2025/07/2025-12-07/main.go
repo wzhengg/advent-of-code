@@ -16,15 +16,19 @@ func main() {
 	data = bytes.TrimSpace(data)
 	grid := bytes.Split(data, []byte{'\n'})
 
+	res := solution(grid)
+	fmt.Println(res)
+}
+
+func solution(grid [][]byte) int {
 	sr, sc := findS(grid)
 
-	visited := make([][]bool, len(grid))
-	for r := range visited {
-		visited[r] = make([]bool, len(grid[r]))
+	memo := make([]map[int]int, len(grid))
+	for r := range memo {
+		memo[r] = make(map[int]int)
 	}
 
-	res := splits(grid, sr, sc, visited)
-	fmt.Println(res)
+	return timelines(grid, sr, sc, memo)
 }
 
 func findS(grid [][]byte) (sr int, sc int) {
@@ -39,16 +43,24 @@ func findS(grid [][]byte) (sr int, sc int) {
 	panic("no S")
 }
 
-func splits(grid [][]byte, r, c int, visited [][]bool) int {
-	if r < 0 || r >= len(grid) || c < 0 || c >= len(grid[r]) || visited[r][c] {
+func timelines(grid [][]byte, r, c int, memo []map[int]int) int {
+	rows, cols := len(grid), len(grid[r])
+
+	if r < 0 || r >= rows || c < 0 || c >= cols {
 		return 0
 	}
-
-	visited[r][c] = true
-
-	if grid[r][c] != '^' {
-		return splits(grid, r+1, c, visited)
+	if r == rows-1 {
+		return 1
+	}
+	if sol, ok := memo[r][c]; ok {
+		return sol
 	}
 
-	return 1 + splits(grid, r, c-1, visited) + splits(grid, r, c+1, visited)
+	if grid[r][c] != '^' {
+		return timelines(grid, r+1, c, memo)
+	}
+
+	memo[r][c] = timelines(grid, r, c-1, memo) + timelines(grid, r, c+1, memo)
+
+	return memo[r][c]
 }
