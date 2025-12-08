@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -44,11 +43,11 @@ func (h *MinHeap) Pop() any {
 }
 
 type UnionFind struct {
-	node   map[Position]int
-	pos    map[int]Position
-	parent []int
-	rank   []int
-	size   []int
+	node       map[Position]int
+	pos        map[int]Position
+	parent     []int
+	rank       []int
+	components int
 }
 
 func NewUnionFind(ps []Position) *UnionFind {
@@ -67,17 +66,13 @@ func NewUnionFind(ps []Position) *UnionFind {
 	}
 
 	rank := make([]int, n)
-	size := make([]int, n)
-	for i := range len(size) {
-		size[i] = 1
-	}
 
 	return &UnionFind{
-		node:   node,
-		pos:    pos,
-		parent: parent,
-		rank:   rank,
-		size:   size,
+		node:       node,
+		pos:        pos,
+		parent:     parent,
+		rank:       rank,
+		components: n,
 	}
 }
 
@@ -105,42 +100,19 @@ func (uf *UnionFind) Union(p, q Position) bool {
 
 	if uf.rank[u] < uf.rank[v] {
 		uf.parent[u] = v
-		uf.size[v] += uf.size[u]
 	} else if uf.rank[u] > uf.rank[v] {
 		uf.parent[v] = u
-		uf.size[u] += uf.size[v]
 	} else {
 		uf.parent[u] = v
-		uf.size[v] += uf.size[u]
 		uf.rank[v]++
 	}
+	uf.components--
 
 	return true
 }
 
-func (uf *UnionFind) Size(p Position) int {
-	root := uf.node[uf.Find(p)]
-	return uf.size[root]
-}
-
-func (uf *UnionFind) ProductOfLargestNSizes(n int) int {
-	tmp := make([]int, 0, len(uf.size))
-	for u, par := range uf.parent {
-		if u == par {
-			tmp = append(tmp, uf.size[u])
-		}
-	}
-	slices.SortFunc(tmp, func(a, b int) int { return b - a })
-
-	n = min(n, len(uf.size))
-	tmp = tmp[0:n]
-
-	res := 1
-	for _, s := range tmp {
-		res *= s
-	}
-
-	return res
+func (uf *UnionFind) Components() int {
+	return uf.components
 }
 
 func main() {
@@ -164,11 +136,11 @@ func main() {
 		ps = append(ps, Position{x, y, z})
 	}
 
-	res := solve(ps, 1000)
+	res := solve(ps)
 	fmt.Println(res)
 }
 
-func solve(ps []Position, connections int) int {
+func solve(ps []Position) int {
 	n := len(ps)
 
 	minHeap := &MinHeap{}
@@ -182,11 +154,11 @@ func solve(ps []Position, connections int) int {
 
 	uf := NewUnionFind(ps)
 
-	for minHeap.Len() > 0 && connections > 0 {
-		e := heap.Pop(minHeap).(Edge)
+	var e Edge
+	for minHeap.Len() > 0 && uf.components > 1 {
+		e = heap.Pop(minHeap).(Edge)
 		uf.Union(e.U, e.V)
-		connections--
 	}
 
-	return uf.ProductOfLargestNSizes(3)
+	return e.U.X * e.V.X
 }
