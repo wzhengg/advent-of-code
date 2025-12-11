@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	source = "you"
-	sink   = "out"
-)
-
 func main() {
 	file, err := os.Open("input.txt")
 	if err != nil {
@@ -32,27 +27,39 @@ func main() {
 		graph[vertex] = edges
 	}
 
-	visited := make(map[string]struct{})
-	res := dfs(graph, source, visited)
+	res := solve(graph)
 	fmt.Println(res)
 }
 
-func dfs(graph map[string][]string, vertex string, visited map[string]struct{}) int {
+// The graph is a DAG
+// It's possible to get from fft to dac, but not the other way around
+// svr -> fft -> dac -> out
+// svr->fft * fft->dac * dac->out
+
+func solve(graph map[string][]string) int {
+	memo := make(map[string]int, len(graph))
+	svr_fft := dfs(graph, "svr", "fft", memo)
+
+	clear(memo)
+	fft_dac := dfs(graph, "fft", "dac", memo)
+
+	clear(memo)
+	dac_out := dfs(graph, "dac", "out", memo)
+
+	return svr_fft * fft_dac * dac_out
+}
+
+func dfs(graph map[string][]string, vertex, sink string, memo map[string]int) int {
 	if vertex == sink {
 		return 1
 	}
-	if _, ok := visited[vertex]; ok {
-		return 0
+	if sol, ok := memo[vertex]; ok {
+		return sol
 	}
 
-	visited[vertex] = struct{}{}
-
-	res := 0
 	for _, edge := range graph[vertex] {
-		res += dfs(graph, edge, visited)
+		memo[vertex] += dfs(graph, edge, sink, memo)
 	}
 
-	delete(visited, vertex)
-
-	return res
+	return memo[vertex]
 }
