@@ -1,11 +1,10 @@
-#include <algorithm>
-#include <cassert>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
-long solve(std::vector<long>& v1, std::vector<long>& v2);
+long solve(const std::vector<long>& v1, const std::vector<long>& v2);
 
 int main() {
 	std::ifstream file("input.txt");
@@ -21,20 +20,21 @@ int main() {
 		v2.push_back(y);
 	}
 
-	std::cout << solve(v1, v2);
+	std::cout << solve(v1, v2) << '\n';
 
 	return 0;
 }
 
-long solve(std::vector<long>& v1, std::vector<long>& v2) {
-	assert(v1.size() == v2.size());
+long solve(const std::vector<long>& v1, const std::vector<long>& v2) {
+	std::unordered_map<long, long> count;
+	count.reserve(v2.size());
+	for (long v : v2) {
+		++count[v];
+	}
 
-	std::sort(v1.begin(), v1.end());
-	std::sort(v2.begin(), v2.end());
-
-	long res{0};
-	for (std::size_t i = 0; i < v1.size(); ++i) {
-		res += std::abs(v1[i] - v2[i]);
+	long res = 0;
+	for (long v : v1) {
+		res += v * count[v];
 	}
 
 	return res;
