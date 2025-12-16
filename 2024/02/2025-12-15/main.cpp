@@ -8,8 +8,7 @@
 
 int solve(const std::vector<std::vector<int>>& reports);
 bool is_safe(const std::vector<int>& report);
-bool is_safe_decreasing(const std::vector<int>& report);
-bool is_safe_increasing(const std::vector<int>& report);
+bool is_safe_dir(const std::vector<int>& report, int dir);
 
 int main() {
 	std::ifstream file("input.txt");
@@ -46,22 +45,28 @@ int solve(const std::vector<std::vector<int>>& reports) {
 }
 
 bool is_safe(const std::vector<int>& report) {
-	return is_safe_decreasing(report) || is_safe_increasing(report);
-}
+	if (is_safe_dir(report, 1) || is_safe_dir(report, -1)) {
+		return true;
+	}
 
-bool is_safe_decreasing(const std::vector<int>& report) {
-	for (std::size_t i = 0; i+1 < report.size(); ++i) {
-		const int diff = report[i] - report[i+1];
-		if (diff < 1 || diff > 3) {
-			return false;
+	for (std::size_t i = 0; i < report.size(); ++i) {
+		std::vector<int> tmp;
+		for (std::size_t j = 0; j < report.size(); ++j) {
+			if (j != i) {
+				tmp.push_back(report[j]);
+			}
+		}
+		if (is_safe_dir(tmp, 1) || is_safe_dir(tmp, -1)) {
+			return true;
 		}
 	}
-	return true;
+
+	return false;
 }
 
-bool is_safe_increasing(const std::vector<int>& report) {
-	for (std::size_t i = 0; i+1 < report.size(); ++i) {
-		int diff = report[i+1] - report[i];
+bool is_safe_dir(const std::vector<int>& report, int dir) {
+	for (std::size_t i = 1; i < report.size(); ++i) {
+		const int diff = dir * (report[i] - report[i-1]);
 		if (diff < 1 || diff > 3) {
 			return false;
 		}
