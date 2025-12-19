@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdlib>
 #include <cstddef>
 #include <fstream>
@@ -47,8 +48,13 @@ int main() {
 int solve(const std::unordered_set<std::string>& rules, const std::vector<std::vector<std::string>>& updates) {
 	int res = 0;
 
-	for (const auto& update : updates) {
-		if (is_in_order(rules, update)) {
+	for (auto update : updates) {
+		if (!is_in_order(rules, update)) {
+			auto compare = [&rules](const std::string& a, const std::string& b) {
+				std::string rule = a + "|" + b;
+				return rules.find(rule) != rules.end();
+			};
+			std::sort(update.begin(), update.end(), compare);
 			int m = update.size() / 2;
 			res += std::stoi(update[m]);
 		}
