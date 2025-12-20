@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
@@ -13,6 +14,9 @@ struct Equation {
 
 long long solve(const std::vector<Equation>& eqs);
 bool is_possible(long long want, const std::vector<long long>& values, int i);
+int count_digits(long long v);
+bool has_suffix(long long v, long long suffix);
+long long remove_suffix(long long v, int digits);
 
 int main() {
 	std::ifstream file("input.txt");
@@ -70,9 +74,30 @@ bool is_possible(long long want, const std::vector<long long>& values, int i) {
 	}
 
 	bool res { is_possible(want-values[i], values, i-1) };
+
 	if (want%values[i] == 0 && !res) {
 		res = res || is_possible(want/values[i], values, i-1);
 	}
 
+	if (has_suffix(want, values[i]) && !res) {
+		int digits { count_digits(values[i]) };
+		res = res || is_possible(remove_suffix(want, digits), values, i-1);
+	}
+
 	return res;
+}
+
+int count_digits(long long v) {
+	return static_cast<int>(std::ceil(std::log10(v+1)));
+}
+
+bool has_suffix(long long v, long long suffix) {
+	int digits { count_digits(suffix) };
+	long long div { std::llround(std::pow(10, digits)) };
+	return v%div == suffix;
+}
+
+long long remove_suffix(long long v, int digits) {
+	long long div { std::llround(std::pow(10, digits)) };
+	return v / div;
 }
