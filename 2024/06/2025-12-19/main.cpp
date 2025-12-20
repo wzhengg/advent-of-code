@@ -10,9 +10,9 @@
 
 enum class Dir { UP, DOWN, LEFT, RIGHT };
 
-int solve(const std::vector<std::string>& grid);
+int solve(std::vector<std::string>& grid);
 std::pair<int, int> find_start(const std::vector<std::string>& grid);
-int walk(const std::vector<std::string>& grid, std::pair<int, int> pos, Dir dir, std::set<std::pair<int, int>>& visited);
+bool walk(const std::vector<std::string>& grid, std::pair<int, int> pos, Dir dir, std::set<std::pair<std::pair<int, int>, Dir>>& visited);
 Dir turn(Dir dir);
 std::pair<int, int> next_position(std::pair<int, int> pos, Dir dir);
 bool is_in_grid(const std::vector<std::string>& grid, std::pair<int, int> pos);
@@ -36,10 +36,30 @@ int main() {
 	return 0;
 }
 
-int solve(const std::vector<std::string>& grid) {
+int solve(std::vector<std::string>& grid) {
 	std::pair<int, int> start { find_start(grid) };
-	std::set<std::pair<int, int>> visited;
-	return walk(grid, start, Dir::UP, visited);
+
+	int res { 0 };
+
+	for (std::size_t r = 0; r < grid.size(); ++r) {
+		for (std::size_t c = 0; c < grid[r].size(); ++c) {
+			if (grid[r][c] == '#' ||
+				(static_cast<int>(r) == std::get<0>(start) && static_cast<int>(c) == std::get<1>(start))) {
+				continue;
+			}
+
+			grid[r][c] = '#';
+
+			std::set<std::pair<std::pair<int, int>, Dir>> visited;
+			if (walk(grid, start, Dir::UP, visited)) {
+				++res;
+			}
+
+			grid[r][c] = '.';
+		}
+	}
+
+	return res;
 }
 
 std::pair<int, int> find_start(const std::vector<std::string>& grid) {
@@ -54,14 +74,16 @@ std::pair<int, int> find_start(const std::vector<std::string>& grid) {
 	return {-1, -1};
 }
 
-int walk(const std::vector<std::string>& grid, std::pair<int, int> pos, Dir dir, std::set<std::pair<int, int>>& visited) {
+bool walk(const std::vector<std::string>& grid, std::pair<int, int> pos, Dir dir, std::set<std::pair<std::pair<int, int>, Dir>>& visited) {
 	if (!is_in_grid(grid, pos)) {
-		return visited.size();
+		return false;
+	}
+	if (visited.contains({pos, dir})) {
+		return true;
 	}
 
-	visited.insert(pos);
-
 	while (is_blocked(grid, pos, dir)) {
+		visited.insert({pos, dir});
 		dir = turn(dir);
 	}
 
