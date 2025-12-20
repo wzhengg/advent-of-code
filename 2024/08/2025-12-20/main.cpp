@@ -8,7 +8,7 @@
 #include <vector>
 
 int solve(const std::vector<std::string>& grid);
-std::pair<std::pair<int, int>, std::pair<int, int>> find_antinodes(std::pair<int, int> p, std::pair<int, int> q);
+std::vector<std::pair<int, int>> find_antinodes(const std::vector<std::string>& grid, std::pair<int, int> p, std::pair<int, int> q);
 
 int main() {
 	std::ifstream file("input.txt");
@@ -46,20 +46,9 @@ int solve(const std::vector<std::string>& grid) {
 	for (const auto& [_, locs] : antennas) {
 		for (std::size_t i = 0; i < locs.size(); ++i) {
 			for (std::size_t j = i+1; j < locs.size(); ++j) {
-				std::pair<std::pair<int, int>, std::pair<int, int>> antinodes { find_antinodes(locs[i], locs[j]) };
-
-				std::pair<int, int> p { antinodes.first };
-				int pr { p.first };
-				int pc { p.second };
-				if (pr >= 0 && pr < static_cast<int>(grid.size()) && pc >= 0 && pc < static_cast<int>(grid[pr].size())) {
-					set.insert(p);
-				}
-
-				std::pair<int, int> q { antinodes.second };
-				int qr { q.first };
-				int qc { q.second };
-				if (qr >= 0 && qr < static_cast<int>(grid.size()) && qc >= 0 && qc < static_cast<int>(grid[qr].size())) {
-					set.insert(q);
+				std::vector<std::pair<int, int>> antinodes { find_antinodes(grid, locs[i], locs[j]) };
+				for (const auto& antinode : antinodes) {
+					set.insert(antinode);
 				}
 			}
 		}
@@ -68,8 +57,27 @@ int solve(const std::vector<std::string>& grid) {
 	return static_cast<int>(set.size());
 }
 
-std::pair<std::pair<int, int>, std::pair<int, int>> find_antinodes(std::pair<int, int> p, std::pair<int, int> q) {
+std::vector<std::pair<int, int>> find_antinodes(const std::vector<std::string>& grid, std::pair<int, int> p, std::pair<int, int> q) {
 	int dr { p.first - q.first };
 	int dc { p.second - q.second };
-	return {{p.first+dr, p.second+dc}, {q.first-dr, q.second-dc}};
+
+	std::vector<std::pair<int, int>> antinodes;
+
+	int pr { p.first };
+	int pc { p.second };
+	while (pr >= 0 && pr < static_cast<int>(grid.size()) && pc >= 0 && pc < static_cast<int>(grid[pr].size())) {
+		antinodes.push_back({pr, pc});
+		pr += dr;
+		pc += dc;
+	}
+
+	int qr { q.first };
+	int qc { q.second };
+	while (qr >= 0 && qr < static_cast<int>(grid.size()) && qc >= 0 && qc < static_cast<int>(grid[qr].size())) {
+		antinodes.push_back({qr, qc});
+		qr -= dr;
+		qc -= dc;
+	}
+
+	return antinodes;
 }
