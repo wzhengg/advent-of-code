@@ -2,12 +2,12 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
-#include <set>
+#include <map>
 #include <string>
 #include <vector>
 
 int solve(const std::vector<std::string>& grid);
-int score(const std::vector<std::string>& grid, int r, int c, std::set<std::pair<int, int>>& visited);
+int score(const std::vector<std::string>& grid, int r, int c, std::map<std::pair<int, int>, int>& memo);
 
 int main() {
 	std::ifstream file("input.txt");
@@ -33,8 +33,8 @@ int solve(const std::vector<std::string>& grid) {
 	for (std::size_t r = 0; r < grid.size(); ++r) {
 		for (std::size_t c = 0; c < grid[r].size(); ++c) {
 			if (grid[r][c] == '0') {
-				std::set<std::pair<int, int>> visited;
-				res += score(grid, r, c, visited);
+				std::map<std::pair<int, int>, int> memo;
+				res += score(grid, r, c, memo);
 			}
 		}
 	}
@@ -42,35 +42,35 @@ int solve(const std::vector<std::string>& grid) {
 	return res;
 }
 
-int score(const std::vector<std::string>& grid, int r, int c, std::set<std::pair<int, int>>& visited) {
+int score(const std::vector<std::string>& grid, int r, int c, std::map<std::pair<int, int>, int>& memo) {
 	int rows { static_cast<int>(grid.size()) };
 	int cols { static_cast<int>(grid[0].size()) };
 
-	if (r < 0 || r >= rows || c < 0 || c >= cols || visited.contains({r, c})) {
+	if (r < 0 || r >= rows || c < 0 || c >= cols) {
 		return 0;
 	}
-
-	visited.insert({r, c});
-
 	if (grid[r][c] == '9') {
 		return 1;
 	}
+	if (memo.contains({r, c})) {
+		return memo[{r, c}];
+	}
 
 
-	int res { 0 };
+	memo[{r, c}] = 0;
 
 	if (r-1 >= 0 && grid[r-1][c] - grid[r][c] == 1) {
-		res += score(grid, r-1, c, visited);
+		memo[{r, c}] += score(grid, r-1, c, memo);
 	}
 	if (r+1 < rows && grid[r+1][c] - grid[r][c] == 1) {
-		res += score(grid, r+1, c, visited);
+		memo[{r, c}] += score(grid, r+1, c, memo);
 	}
 	if (c-1 >= 0 && grid[r][c-1] - grid[r][c] == 1) {
-		res += score(grid, r, c-1, visited);
+		memo[{r, c}] += score(grid, r, c-1, memo);
 	}
 	if (c+1 < cols && grid[r][c+1] - grid[r][c] == 1) {
-		res += score(grid, r, c+1, visited);
+		memo[{r, c}] += score(grid, r, c+1, memo);
 	}
 
-	return res;
+	return memo[{r, c}];
 }
