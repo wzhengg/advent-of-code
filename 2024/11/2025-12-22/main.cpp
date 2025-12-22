@@ -2,10 +2,11 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
-long long solve(const std::vector<long long>& vec);
-long long f(long long stone, int blinks);
+long long solve(const std::vector<long long>& vec, int blinks);
+long long f(long long stone, int blinks, std::vector<std::unordered_map<long long, long long>>& memo);
 int count_digits(long long v);
 std::pair<int, int> split(long long v);
 
@@ -22,36 +23,43 @@ int main() {
 		stones.push_back(stone);
 	}
 
-	std::cout << solve(stones);
+	std::cout << solve(stones, 75);
 
 	return 0;
 }
 
-long long solve(const std::vector<long long>& vec) {
+long long solve(const std::vector<long long>& vec, int blinks) {
 	long long res { 0 };
 
 	for (const auto stone : vec) {
-		res += f(stone, 25);
+		std::vector<std::unordered_map<long long, long long>> memo;
+		for (int i = 0; i <= blinks; ++i) {
+			memo.push_back({});
+		}
+		res += f(stone, blinks, memo);
 	}
 
 	return res;
 }
 
-long long f(long long stone, int blinks) {
+long long f(long long stone, int blinks, std::vector<std::unordered_map<long long, long long>>& memo) {
 	if (blinks == 0) {
 		return 1;
 	}
+	if (memo[blinks].contains(stone)) {
+		return memo[blinks][stone];
+	}
 
 	if (stone == 0) {
-		return f(1, blinks-1);
-	}
-
-	if (count_digits(stone) % 2 == 0) {
+		memo[blinks][stone] = f(1, blinks-1, memo);
+	} else if (count_digits(stone) % 2 == 0) {
 		std::pair<int, int> p { split(stone) };
-		return f(p.first, blinks-1) + f(p.second, blinks-1);
+		memo[blinks][stone] = f(p.first, blinks-1, memo) + f(p.second, blinks-1, memo);
+	} else {
+		memo[blinks][stone] = f(stone*2024, blinks-1, memo);
 	}
 
-	return f(stone*2024, blinks-1);
+	return memo[blinks][stone];
 }
 
 int count_digits(long long v) {
