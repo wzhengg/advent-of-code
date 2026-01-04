@@ -8,6 +8,7 @@ int main(void) {
 	}
 
 	int floor = 0;
+	int i = 0;
 
 	int c;
 	while ((c = fgetc(fp)) != EOF) {
@@ -19,11 +20,17 @@ int main(void) {
 				--floor;
 				break;
 		}
+
+		++i;
+
+		if (floor == -1) {
+			break;
+		}
 	}
 
 	fclose(fp);
 
-	printf("%d\n", floor);
+	printf("%d\n", i);
 
 	return 0;
 }
