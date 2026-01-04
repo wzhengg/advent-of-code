@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-long get_surface_area(long l, long w, long h);
-long get_area_of_smallest_side(long l, long w, long h);
+long get_volume(long l, long w, long h);
+long get_smallest_perimeter(long l, long w, long h);
 
 int main(void) {
 	FILE *fp = fopen("input.txt", "r");
@@ -14,8 +14,8 @@ int main(void) {
 
 	long l, w, h;
 	while (fscanf(fp, "%ldx%ldx%ld", &l, &w, &h) != EOF) {
-		res += get_surface_area(l, w, h);
-		res += get_area_of_smallest_side(l, w, h);
+		res += get_volume(l, w, h);
+		res += get_smallest_perimeter(l, w, h);
 	}
 
 	fclose(fp);
@@ -25,17 +25,17 @@ int main(void) {
 	return 0;
 }
 
-long get_surface_area(long l, long w, long h) {
-	return (2*l*w) + (2*w*h) + (2*h*l);
+long get_volume(long l, long w, long h) {
+	return l * w * h;
 }
 
-long get_area_of_smallest_side(long l, long w, long h) {
-	long res = l * w;
-	if (w * h < res) {
-		res = w * h;
+long get_smallest_perimeter(long l, long w, long h) {
+	long res = l+l+w+w;
+	if (w+w+h+h < res) {
+		res = w+w+h+h;
 	}
-	if (h * l < res) {
-		res = h * l;
+	if (l+l+h+h < res) {
+		res = l+l+h+h;
 	}
 	return res;
 }
