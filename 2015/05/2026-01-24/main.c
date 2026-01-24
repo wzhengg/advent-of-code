@@ -8,6 +8,8 @@
 char lines[LINES][STRLEN+2];
 
 bool isnice(char *s);
+bool has_double_pair(char *s);
+bool has_sandwich(char *s);
 
 int main(void) {
 	FILE *fp = fopen("input.txt", "r");
@@ -36,25 +38,24 @@ int main(void) {
 }
 
 bool isnice(char *s) {
-	int vowels = 0;
-	for (int i = 0; i < STRLEN; ++i) {
-		if (s[i] == 'a' || s[i] == 'e' || s[i] == 'i' || s[i] == 'o' || s[i] == 'u') {
-			++vowels;
+	return has_double_pair(s) && has_sandwich(s);
+}
+
+bool has_double_pair(char *s) {
+	for (int i = 0; i < STRLEN-1; ++i) {
+		for (int j = i+2; j < STRLEN-1; ++j) {
+			if (s[i] == s[j] && s[i+1] == s[j+1]) {
+				return true;
+			}
 		}
 	}
-	if (vowels < 3) {
-		return false;
-	}
 
-	for (int i = 0; i < STRLEN-1; ++i) {
-		if (s[i] == 'a' && s[i+1] == 'b') return false;
-		if (s[i] == 'c' && s[i+1] == 'd') return false;
-		if (s[i] == 'p' && s[i+1] == 'q') return false;
-		if (s[i] == 'x' && s[i+1] == 'y') return false;
-	}
+	return false;
+}
 
-	for (int i = 0; i < STRLEN-1; ++i) {
-		if (s[i] == s[i+1]) {
+bool has_sandwich(char *s) {
+	for (int i = 0; i < STRLEN-2; ++i) {
+		if (s[i] == s[i+2]) {
 			return true;
 		}
 	}
