@@ -19,30 +19,33 @@ int main(void) {
 
 	fclose(fp);
 
-	int r, c, count;
+	int r, c, rr, cc, count;
 
-	r = c = N;
+	r = c = rr = cc = N;
 	count = 1;
 	grid[r][c] = TRUE;
 
 	for (int i = 0; i < N; ++i) {
+		int *x = i%2==0 ? &r : &rr;
+		int *y = i%2==0 ? &c : &cc;
+
 		switch (buf[i]) {
 			case '^':
-				--r;
+				--(*x);
 				break;
 			case '>':
-				++c;
+				++(*y);
 				break;
 			case 'v':
-				++r;
+				++(*x);
 				break;
 			case '<':
-				--c;
+				--(*y);
 				break;
 		}
 
-		if (!grid[r][c]) {
-			grid[r][c] = TRUE;
+		if (!grid[*x][*y]) {
+			grid[*x][*y] = TRUE;
 			++count;
 		}
 	}
