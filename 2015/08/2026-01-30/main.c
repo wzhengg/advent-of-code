@@ -11,25 +11,18 @@
 char lines[LINES][MAXLEN];
 
 int getdiff(char *s) {
-	int nsrc, nmem;
-	char *start, *end;
+	int nsrc, nenc, i;
 
 	nsrc = strlen(s) - 1;
-	nmem = 0;
+	nenc = 6;
 
-	start = s + 1;
-	end = s + nsrc - 1;
+	for (i = 1; i < nsrc-1; ++i)
+		switch (s[i]) {
+			case '\\': case '"': nenc += 2; break;
+			default: ++nenc; break;
+		}
 
-	for (; start < end; ++start, ++nmem) {
-		if (*start != '\\')
-			continue;
-
-		++start;
-		if (*start != '\"' && *start != '\\')
-			start += 2;
-	}
-
-	return nsrc - nmem;
+	return nenc - nsrc;
 }
 
 int solve(void) {
