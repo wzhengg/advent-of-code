@@ -6,9 +6,6 @@
 #define LINES 300
 #define LINESIZE 32
 
-#define FALSE 0
-#define TRUE  1
-
 enum op { ON, OFF, TOGGLE };
 
 struct coordinate {
@@ -33,18 +30,20 @@ void do_instruction(char grid[][N], struct instruction instr) {
 		for (c = left; c <= right; c++) {
 			switch (instr.op) {
 				case ON:
-					grid[r][c] = TRUE;
+					grid[r][c]++;
 					break;
 				case OFF:
-					grid[r][c] = FALSE;
+					if (grid[r][c] > 0)
+						grid[r][c]--;
 					break;
 				case TOGGLE:
-					grid[r][c] = !grid[r][c];
+					grid[r][c] += 2;
 					break;
 			}
 		}
 	}
 }
+
 long solve(char grid[][N], struct instruction *instrs) {
 	int i, r, c;
 	long res;
@@ -55,8 +54,7 @@ long solve(char grid[][N], struct instruction *instrs) {
 	res = 0;
 	for (r = 0; r < N; r++)
 		for (c = 0; c < N; c++)
-			if (grid[r][c])
-				res++;
+			res += grid[r][c];
 
 	return res;
 }
