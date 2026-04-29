@@ -1,15 +1,15 @@
 #define _GNU_SOURCE
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define DIGITS 5
 
-char keypad[][3] = {
-	{'1', '2', '3'},
-	{'4', '5', '6'},
-	{'7', '8', '9'}
+char keypad[][5] = {
+	{ 0 ,  0 , '1',  0 ,  0 },
+	{ 0 , '2', '3', '4',  0 },
+	{'5', '6', '7', '8', '9'},
+	{ 0 , 'A', 'B', 'C',  0 },
+	{ 0 ,  0 , 'D',  0 ,  0 }
 };
 
 int main(void) {
@@ -22,29 +22,35 @@ int main(void) {
 	size_t n = 0;
 	ssize_t nread;
 
-	int row = 1;
-	int col = 1;
+	int row = 2;
+	int col = 0;
 
-	char code[5];
+	char code[DIGITS];
 	int ci = 0;
 
-	while ((nread = getline(&line, &n, fp)) != -1) {
-		for (int i = 0; i < nread-1; ++i) {
-			switch (line[i]) {
+	for (int i = 0; (nread = getline(&line, &n, fp)) != -1 && i < DIGITS; ++i) {
+		for (int j = 0; j < nread-1; ++j) {
+			switch (line[j]) {
 				case 'U':
-					row = MAX(0, row-1);
+					--row;
+					if (row < 0 || keypad[row][col] == 0)
+						++row;
 					break;
 				case 'D':
-					row = MIN(2, row+1);
+					++row;
+					if (row > 4 || keypad[row][col] == 0)
+						--row;
 					break;
 				case 'L':
-					col = MAX(0, col-1);
+					--col;
+					if (col < 0 || keypad[row][col] == 0)
+						++col;
 					break;
 				case 'R':
-					col = MIN(2, col+1);
+					++col;
+					if (col > 4 || keypad[row][col] == 0)
+						--col;
 					break;
-				default:
-					assert(0);
 			}
 		}
 
