@@ -1,2 +1,2 @@
 main: main.c
-	gcc -o main main.c -O0 -ggdb -Wall -Wextra -pedantic -std=c99
+	gcc -o main main.c -O2 -Wall -Wextra -Werror -pedantic -std=c99

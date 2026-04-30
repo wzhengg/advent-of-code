@@ -1,12 +1,10 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define MAXLINE 80
-#define NALPHA  26
-#define MAXFREQ 60
 
 #define ISDIGIT(c) ('0' <= (c) && (c) <= '9')
+#define ISALPHA(c) ('a' <= (c) && (c) <= 'z')
 
 int main(void) {
 	FILE *fp = fopen("input.txt", "r");
@@ -15,46 +13,24 @@ int main(void) {
 
 	char line[MAXLINE];
 
-	int res = 0;
-
 	while (fgets(line, MAXLINE, fp)) {
-		int count[NALPHA] = {0};
+		char *rp = line;
+		while (!ISDIGIT(*rp))
+			++rp;
 
-		char *lp;
-		for (lp = line; *lp && !ISDIGIT(*lp); ++lp) {
-			if ('a' <= *lp && *lp <= 'z')
-				++count[*lp-'a'];
-		}
+		int id = atoi(rp);
+		int shift = id % 26;
 
-		long bucket[MAXFREQ] = {0};
-		for (int i = 0; i < NALPHA; ++i) {
-			assert(count[i] < MAXFREQ);
-			if (count[i])
-				bucket[count[i]] |= 1<<i;
-		}
-
-		int id = atoi(lp);
-		while (*lp && ISDIGIT(*lp))
-			++lp;
-		++lp;
-
-		int n = 0;
-		for (int i = MAXFREQ-1; i >= 0; --i) {
-			if (!bucket[i]) continue;
-			for (char c = 'a'; c <= 'z'; ++c) {
-				if (!(bucket[i] & 1<<(c-'a')))
-					continue;
-				if (*lp++ != c || ++n == 5)
-					goto end;
+		for (char *lp = line; lp != rp; ++lp) {
+			if (ISALPHA(*lp)) {
+				*lp = ((*lp-'a'+shift) % 26) + 'a';
 			}
 		}
-end:
 
-		if (*lp == ']')
-			res += id;
+		*rp = '\0';
+
+		printf("%s (%d)\n", line, id);
 	}
-
-	printf("%d", res);
 
 	return 0;
 }
