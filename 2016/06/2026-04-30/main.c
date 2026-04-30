@@ -22,13 +22,13 @@ int main(void) {
 	char out[COLS+1] = {0};
 
 	for (int i = 0; i < COLS; ++i) {
-		int best = 0;
+		int least = 0;
 		for (int j = 1; j < NALPHA; ++j) {
-			if (count[i][j] > count[i][best]) {
-				best = j;
+			if (count[i][j] < count[i][least]) {
+				least = j;
 			}
 		}
-		out[i] = best + 'a';
+		out[i] = least + 'a';
 	}
 
 	printf("%s", out);
