@@ -15,23 +15,20 @@ int main(void) {
 		char a, b;
 		assert(sscanf(buf, "%c %c", &a, &b) == 2);
 
-		if (b == 'X') {
-			res += 1;
-			if (a == 'A') res += 3;
-			else if (a == 'B') ;
-			else if (a == 'C') res += 6;
+		if (a == 'A') {
+			if (b == 'X') res += 3;
+			else if (b == 'Y') res += 4;
+			else if (b == 'Z') res += 8;
 			else assert(0);
-		} else if (b == 'Y') {
-			res += 2;
-			if (a == 'A') res += 6;
-			else if (a == 'B') res += 3;
-			else if (a == 'C') ;
+		} else if (a == 'B') {
+			if (b == 'X') res += 1;
+			else if (b == 'Y') res += 5;
+			else if (b == 'Z') res += 9;
 			else assert(0);
-		} else if (b == 'Z') {
-			res += 3;
-			if (a == 'A') ;
-			else if (a == 'B') res += 6;
-			else if (a == 'C') res += 3;
+		} else if (a == 'C') {
+			if (b == 'X') res += 2;
+			else if (b == 'Y') res += 6;
+			else if (b == 'Z') res += 7;
 			else assert(0);
 		} else {
 			assert(0);

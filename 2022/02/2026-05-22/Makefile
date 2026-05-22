@@ -1,5 +1,5 @@
 main: main.c
-	gcc -o main main.c -O0 -ggdb -Wall -Wextra -Wpedantic -std=c99
+	gcc -o main main.c -O2 -Wall -Wextra -Wpedantic -Werror -std=c99
 
 clean:
 	rm main
