@@ -62,12 +62,13 @@ int main(void) {
 		--src;
 		--dst;
 
-		for (int i = 0; i < qty; ++i) {
-			Node *top = stacks[src];
-			stacks[src] = stacks[src]->next;
-			top->next = stacks[dst];
-			stacks[dst] = top;
-		}
+		Node *head = stacks[src];
+		Node *tail = head;
+		for (int i = 0; i < qty-1; ++i)
+			tail = tail->next;
+		stacks[src] = tail->next;
+		tail->next = stacks[dst];
+		stacks[dst] = head;
 	}
 
 	char res[STACKS+1];
