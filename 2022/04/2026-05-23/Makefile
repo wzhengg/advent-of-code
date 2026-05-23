@@ -1,5 +1,5 @@
 main: main.c
-	$(CC) -o $@ $^ -O0 -ggdb -Wall -Wextra -Wpedantic -std=c99
+	$(CC) -o $@ $^ -O2 -Wall -Wextra -Wpedantic -std=c99
 
 clean:
 	rm main
