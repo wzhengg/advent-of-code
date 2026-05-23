@@ -1,6 +1,5 @@
-#define _GNU_SOURCE
+#include <assert.h>
 #include <stdio.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 int main(void) {
@@ -10,29 +9,36 @@ int main(void) {
 	}
 
 	int res = 0;
+	char buf1[50], buf2[50], buf3[50];
 
-	char *line = NULL;
-	size_t n = 0;
-	ssize_t nread;
+	while (fgets(buf1, sizeof(buf1), fp)) {
+		assert(fgets(buf2, sizeof(buf2), fp));
+		assert(fgets(buf3, sizeof(buf3), fp));
 
-	while ((nread = getline(&line, &n, fp)) != -1) {
-		char set[52] = {0};
+		char set1[52] = {0};
+		char set2[52] = {0};
 
-		int i;
-		for (i = 0; i < (nread-1)/2; ++i) {
-			char c = line[i];
+		for (int i = 0; buf1[i] != '\n'; ++i) {
+			char c = buf1[i];
 			if ('a' <= c && c <= 'z')
-				set[c-'a'] = 1;
+				set1[c-'a'] = 1;
 			else if ('A' <= c && c <= 'Z')
-				set[c-'A'+26] = 1;
+				set1[c-'A'+26] = 1;
+		}
+		for (int i = 0; buf2[i] != '\n'; ++i) {
+			char c = buf2[i];
+			if ('a' <= c && c <= 'z')
+				set2[c-'a'] = 1;
+			else if ('A' <= c && c <= 'Z')
+				set2[c-'A'+26] = 1;
 		}
 
-		for (; i < nread-1; ++i) {
-			char c = line[i];
-			if ('a' <= c && c <= 'z' && set[c-'a']) {
+		for (int i = 0; buf3[i] != '\n'; ++i) {
+			char c = buf3[i];
+			if ('a'<=c && c<='z' && set1[c-'a'] && set2[c-'a']) {
 				res += c-'a'+1;
 				break;
-			} else if ('A' <= c && c <= 'Z' && set[c-'A'+26]) {
+			} else if ('A'<=c && c<='Z' && set1[c-'A'+26] && set2[c-'A'+26]) {
 				res += c-'A'+27;
 				break;
 			}
