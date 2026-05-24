@@ -20,7 +20,7 @@ int main(void) {
 
 		mask |= (long)1 << (buf[r]-'a');
 
-		if (r-l+1 == 4)
+		if (r-l+1 == 14)
 			break;
 	}
 
