@@ -14,21 +14,30 @@ struct List {
 };
 
 struct Node {
-	uint64_t size;
+	int64_t size;
 	Node *parent;
 	Node *next;
 	List subdirs;
 };
 
-uint64_t solve(Node *root, uint64_t *sum) {
-	uint64_t size = root->size;
+int64_t totalsize(Node *root) {
 	for (Node *dir = root->subdirs.head; dir; dir = dir->next)
-		size += solve(dir, sum);
+		root->size += totalsize(dir);
+	return root->size;
+}
 
-	if (size <= 100000)
-		*sum += size;
+int64_t solve(Node *root, int64_t min) {
+	if (root->size < min)
+		return -1;
 
-	return size;
+	int64_t best = root->size;
+	for (Node *dir = root->subdirs.head; dir; dir = dir->next) {
+		int64_t res = solve(dir, min);
+		if (res != -1 && res < best)
+			best = res;
+	}
+
+	return best;
 }
 
 int main(void) {
@@ -43,8 +52,8 @@ int main(void) {
 		if (!strcmp(line, "$ ls\n") || !strncmp(line, "dir", 3))
 			continue;
 
-		uint64_t size;
-		if (sscanf(line, "%lu", &size) == 1) {
+		int64_t size;
+		if (sscanf(line, "%ld", &size) == 1) {
 			curr->size += size;
 			continue;
 		}
@@ -80,9 +89,9 @@ int main(void) {
 		curr = dir;
 	}
 
-	uint64_t res = 0;
-	solve(root, &res);
-	printf("%lu\n", res);
+	int64_t free = 70000000 - totalsize(root);
+	int64_t res = solve(root, 30000000 - free);
+	printf("%ld\n", res);
 
 	return 0;
 }
