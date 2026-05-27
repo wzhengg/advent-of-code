@@ -4,36 +4,31 @@
 
 #define N 99
 
-int visible_left(char grid[N][N+2], int row, int col) {
-	for (int c = 0; c < col; ++c)
-		if (grid[row][c] >= grid[row][col])
-			return 0;
-	return 1;
-}
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 
-int visible_right(char grid[N][N+2], int row, int col) {
-	for (int c = col+1; c < N; ++c)
-		if (grid[row][c] >= grid[row][col])
-			return 0;
-	return 1;
-}
+long scenic_score(char grid[N][N+2], int row, int col) {
+	long res = 1;
 
-int visible_top(char grid[N][N+2], int row, int col) {
-	for (int r = 0; r < row; ++r)
-		if (grid[r][col] >= grid[row][col])
-			return 0;
-	return 1;
-}
+	int r, c;
 
-int visible_bot(char grid[N][N+2], int row, int col) {
-	for (int r = row+1; r < N; ++r)
-		if (grid[r][col] >= grid[row][col])
-			return 0;
-	return 1;
-}
+	for (c = MAX(0, col-1); c > 0 && grid[row][c] < grid[row][col]; --c)
+		;
+	res *= (col-c);
 
-int is_visible(char grid[N][N+2], int r, int c) {
-	return visible_left(grid, r, c) || visible_right(grid, r, c) || visible_top(grid, r, c) || visible_bot(grid, r, c);
+	for (c = MIN(N-1, col+1); c < N-1 && grid[row][c] < grid[row][col]; ++c)
+		;
+	res *= (c-col);
+
+	for (r = MAX(0, row-1); r > 0 && grid[r][col] < grid[row][col]; --r)
+		;
+	res *= (row-r);
+
+	for (r = MIN(N-1, row+1); r < N-1 && grid[r][col] < grid[row][col]; ++r)
+		;
+	res *= (r-row);
+
+	return res;
 }
 
 int main(void) {
@@ -45,10 +40,13 @@ int main(void) {
 		assert(fgets(grid[i], N+2, fp));
 
 	int res = 0;
-	for (int r = 0; r < N; ++r)
-		for (int c = 0; c < N; ++c)
-			if (is_visible(grid, r, c))
-				++res;
+	for (int r = 0; r < N; ++r) {
+		for (int c = 0; c < N; ++c) {
+			long score = scenic_score(grid, r, c);
+			if (score > res)
+				res = score;
+		}
+	}
 
 	printf("%d\n", res);
 
