@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define KNOTS 10
+
 #define P 10
 #define SETCAP (1<<P)
 
@@ -30,8 +32,8 @@ void setadd(HashSet *set, Position pos) {
 	uint64_t key = ((uint64_t)pos.x << 32) | (uint32_t)pos.y;
 	int hash = (key * 0x9e3779b97f4a7c15ull) >> (64 - P);
 
-	for (Node *n = set->arr[hash]; n; n = n->next)
-		if (n->key == key)
+	for (Node *node = set->arr[hash]; node; node = node->next)
+		if (node->key == key)
 			return;
 
 	Node *node = malloc(sizeof(Node));
@@ -47,11 +49,12 @@ int main(void) {
 	FILE *fp = fopen("input.txt", "r");
 	if (!fp) exit(1);
 
-	Position head = {0};
-	Position tail = {0};
+	Position ps[KNOTS] = {0};
+	Position *head = ps;
+	Position *tail = &ps[KNOTS-1];
 
 	HashSet set = {0};
-	setadd(&set, tail);
+	setadd(&set, *tail);
 
 	char buf[8];
 	while (fgets(buf, sizeof(buf), fp)) {
@@ -61,34 +64,47 @@ int main(void) {
 
 		for (int i = 0; i < count; ++i) {
 			switch (dir) {
-				case 'U': ++head.y; break;
-				case 'D': --head.y; break;
-				case 'L': --head.x; break;
-				case 'R': ++head.x; break;
+				case 'U': head->y++; break;
+				case 'D': head->y--; break;
+				case 'L': head->x--; break;
+				case 'R': head->x++; break;
 				default: assert(0);
 			}
 
-			if (ABS(head.x-tail.x) > 1 || ABS(head.y-tail.y) > 1) {
-				if (head.x == tail.x && tail.y < head.y) {
-					++tail.y;
-				} else if (head.x == tail.x && tail.y > head.y) {
-					--tail.y;
-				} else if (head.y == tail.y && tail.x < head.x) {
-					++tail.x;
-				} else if (head.y == tail.y && tail.x > head.x) {
-					--tail.x;
-				} else if ((tail.x-head.x == 2 && tail.y-head.y == -1) || (tail.x-head.x == 1 && tail.y-head.y == -2)) {
-					--tail.x; ++tail.y;
-				} else if ((tail.x-head.x == -1 && tail.y-head.y == -2) || (tail.x-head.x == -2 && tail.y-head.y == -1)) {
-					++tail.x; ++tail.y;
-				} else if ((tail.x-head.x == -2 && tail.y-head.y == 1) || (tail.x-head.x == -1 && tail.y-head.y == 2)) {
-					++tail.x; --tail.y;
-				} else if ((tail.x-head.x == 1 && tail.y-head.y == 2) || (tail.x-head.x == 2 && tail.y-head.y == 1)) {
-					--tail.x; --tail.y;
+			for (int j = 1; j < KNOTS; ++j) {
+				Position *p1 = &ps[j-1];
+				Position *p2 = &ps[j];
+
+				int32_t x1 = p1->x;
+				int32_t y1 = p1->y;
+				int32_t x2 = p2->x;
+				int32_t y2 = p2->y;
+
+				if (ABS(x1-x2) <= 1 && ABS(y1-y2) <= 1)
+					break;
+
+				if (x1 == x2 && y2 < y1) {
+					p2->y++;
+				} else if (x1 == x2 && y2 > y1) {
+					p2->y--;
+				} else if (y1 == y2 && x2 < x1) {
+					p2->x++;
+				} else if (y1 == y2 && x2 > x1) {
+					p2->x--;
+				} else if ((x2-x1 == 2 && y2-y1 == -2) || (x2-x1 == 2 && y2-y1 == -1) || (x2-x1 == 1 && y2-y1 == -2)) {
+					p2->x--; p2->y++;
+				} else if ((x2-x1 == -2 && y2-y1 == -2) || (x2-x1 == -1 && y2-y1 == -2) || (x2-x1 == -2 && y2-y1 == -1)) {
+					p2->x++; p2->y++;
+				} else if ((x2-x1 == -2 && y2-y1 == 2) || (x2-x1 == -2 && y2-y1 == 1) || (x2-x1 == -1 && y2-y1 == 2)) {
+					p2->x++; p2->y--;
+				} else if ((x2-x1 == 2 && y2-y1 == 2) || (x2-x1 == 1 && y2-y1 == 2) || (x2-x1 == 2 && y2-y1 == 1)) {
+					p2->x--; p2->y--;
 				} else {
 					assert(0);
 				}
-				setadd(&set, tail);
+
+				if (p2 == tail)
+					setadd(&set, *tail);
 			}
 		}
 	}
