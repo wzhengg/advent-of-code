@@ -7,31 +7,41 @@ int main(void) {
 
 	int cycle = 1;
 	int x = 1;
-	int sum = 0;
 
 	char buf[10];
 	while (fgets(buf, sizeof(buf), fp)) {
-		int oldcycle = cycle;
-		int oldx = x;
+		int drawpos = (cycle-1) % 40;
+		if (x-1 <= drawpos && drawpos <= x+1)
+			putchar('#');
+		else
+			putchar('.');
+
+		if (drawpos == 39)
+			putchar('\n');
+
+		++cycle;
 
 		int v;
 		switch (sscanf(buf, "addx %d", &v)) {
-			case 1:
-				cycle += 2;
-				x += v;
-				break;
-			default:
-				cycle += 1;
-				break;
+			case 0: case EOF: continue;
 		}
 
-		if ((cycle-20) % 40 == 0)
-			sum += cycle * x;
-		else if ((oldcycle+1-20) % 40 == 0)
-			sum += (oldcycle+1) * oldx;
-	}
+		int endcycle = cycle + 1;
+		do {
+			drawpos = (cycle-1) % 40;
+			if (x-1 <= drawpos && drawpos <= x+1)
+				putchar('#');
+			else
+				putchar('.');
 
-	printf("%d\n", sum);
+			if (drawpos == 39)
+				putchar('\n');
+
+			++cycle;
+		} while (cycle < endcycle);
+
+		x += v;
+	}
 
 	return 0;
 }
