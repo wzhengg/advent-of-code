@@ -264,6 +264,13 @@ int main(void) {
 
 	assert(feof(fp) && !ferror(fp));
 
+	uint16_t wire_a_signal = get_wire_signal("a");
+	wires[wire_id("b")].src.signal.signal = wire_a_signal;
+	for (size_t i = 0; i < ARRAY_COUNT(wires); ++i) {
+		if (wires[i].src.type) {
+			wires[i].signal = 0;
+		}
+	}
 	printf("%hu\n", get_wire_signal("a"));
 
 	return 0;
